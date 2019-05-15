@@ -1,0 +1,12 @@
+kind: pipeline
+name: wheelhouse-BE
+
+steps:
+-name: build
+image: node:10.15.3-stretch
+commands:
+ - node app.js
+when:
+  event:
+  - push
+  - pull-request
