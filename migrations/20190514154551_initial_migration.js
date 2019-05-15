@@ -4,11 +4,11 @@ exports.up = function (knex) {
       table.increments('id');
       table.string('full_name', 40);
       table.string('username', 40).notNullable();
-      table.string('email', 40);
-      table.string('password', 255);
+      table.string('email', 40).unique().notNullable();
+      table.string('password', 255).notNullable();
       table.string('profile_photo_url', 255);
       table.string('header_photo_url', 255);
-      table.string('work_status', 40);
+      table.string('work_status', 40).notNullable();
       table.text('bio');
     })
     .createTable('projects', (table) => {
