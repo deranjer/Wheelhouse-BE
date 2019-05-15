@@ -3,10 +3,10 @@ name: wheelhouse-BE
 
 steps:
 -name: build
- image: node:10.15.3-stretch
- commands:
+image: node:10.15.3-stretch
+commands:
  - node app.js
- when:
+when:
   event:
   - push
   - pull-request
