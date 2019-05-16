@@ -24,6 +24,4 @@ cache:
 
 test_suite:
   script:
-  - sudo npm i -g knex
-  - knex migrate:latest --test
   - npm test
