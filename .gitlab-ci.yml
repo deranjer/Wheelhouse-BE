@@ -24,6 +24,7 @@ cache:
 
 test_suite:
   script:
+  - npm install
   - npm i -g knex
-  - knex migrate:latest --test
+  - knex migrate:latest
   - npm test
