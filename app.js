@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const Knex = require('knex');
 const { Model } = require('objection');
 require('dotenv').config();
+const routeIndex = require('./api/routes/routeIndex');
 
 const knexfile = require('./knexfile');
 
@@ -14,6 +15,7 @@ Model.knex(knex);
 // App Setup
 const app = express();
 app.use(bodyParser.json());
+app.use(routeIndex);
 
 const port = process.env.PORT || 5000;
 
