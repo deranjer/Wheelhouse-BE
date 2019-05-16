@@ -10,4 +10,14 @@ module.exports = {
       host: '127.0.0.1',
     },
   },
+
+  test: {
+    client: 'pg',
+    connection: {
+      database: process.env.testDatabase,
+      user: process.env.testUser,
+      password: process.env.testPassword,
+      host: '127.0.0.1',
+    },
+  },
 };
