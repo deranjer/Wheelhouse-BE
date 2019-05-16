@@ -26,5 +26,5 @@ test_suite:
   script:
   - npm install
   - npm i -g knex
-  - knex migrate:latest
+  - knex migrate:latest --env test
   - npm test
