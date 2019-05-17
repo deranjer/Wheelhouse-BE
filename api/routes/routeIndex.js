@@ -1,7 +1,7 @@
-const router = require('express').Router();
+const userRouter = require('./userRouter');
 
-router.get('/', (req, res) => {
-  res.status(200).json({ success: true, message: 'Welcome to Wheelhouse!' });
-});
+const routeIndex = {
+  userRouter,
+};
 
-module.exports = router;
+module.exports = routeIndex;

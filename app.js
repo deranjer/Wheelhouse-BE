@@ -13,9 +13,11 @@ const knex = Knex(knexfile[env]);
 Model.knex(knex);
 
 // App Setup
+const { userRouter } = routeIndex;
+
 const app = express();
 app.use(bodyParser.json());
-app.use(routeIndex);
+app.use(userRouter);
 
 const port = process.env.PORT || 5000;
 
