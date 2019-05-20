@@ -18,6 +18,7 @@ describe('Project objection model', () => {
     await knex.raw('TRUNCATE TABLE users, projects CASCADE');
     await knex.raw('TRUNCATE TABLE projects, project_categories CASCADE');
     await knex.raw('ALTER SEQUENCE projects_id_seq RESTART WITH 1');
+    await knex.raw('ALTER SEQUENCE users_id_seq RESTART WITH 1');
 
     await User.query().insertGraph({
       full_name: 'Josh G',
@@ -47,6 +48,42 @@ describe('Project objection model', () => {
 
       expect(project.name).toBe('Cool Project');
       done();
+    });
+
+    it('Should throw an error if a project is not attached to a valid user ID', async (done) => {
+      try {
+        await Project.query().insertGraph({
+          name: 'Cool Project',
+          created_at: new Date(),
+        });
+      } catch (err) {
+        expect(err).not.toBeNull();
+        done();
+      }
+    });
+
+    it('Should throw an error if a name is not submitted', async (done) => {
+      try {
+        await Project.query().insertGraph({
+          user_id: 1,
+          created_at: new Date(),
+        });
+      } catch (err) {
+        expect(err).not.toBeNull();
+        done();
+      }
+    });
+
+    it('Should throw an error if a create_at timestamp is not submitted', async (done) => {
+      try {
+        await Project.query().insertGraph({
+          user_id: 1,
+          name: 'Cool Project',
+        });
+      } catch (err) {
+        expect(err).not.toBeNull();
+        done();
+      }
     });
   });
 });
