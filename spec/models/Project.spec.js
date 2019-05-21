@@ -9,6 +9,7 @@ const Project = require('../../models/Project');
 const Category = require('../../models/Category');
 const ProjectCategory = require('../../models/ProjectCategory');
 const Milestone = require('../../models/Milestone');
+const Position = require('../../models/Position');
 
 describe('Project objection model', () => {
   beforeAll(async (done) => {
@@ -185,6 +186,25 @@ describe('Project objection model', () => {
       ]);
 
       expect(milestones[0].name).toBe('MVP');
+      done();
+    });
+  });
+
+  describe('project instance method project.$relatedQuery("positions")', () => {
+    it('Should return a list of all positions for a given project', async (done) => {
+      const project = await Project.query().insertGraph({
+        user_id: 1,
+        name: 'Cool Project',
+        created_at: new Date(),
+      });
+
+      await Position.query().insertGraph([
+        { project_id: 1, title: 'CEO', description: 'Run everything.' },
+        { project_id: 1, title: 'CFO', description: 'Manage the money.' },
+      ]);
+
+      const positions = await project.$relatedQuery('positions');
+      expect(positions.length).toBe(2);
       done();
     });
   });
