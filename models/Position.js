@@ -10,7 +10,7 @@ class Position extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['id', 'project_id', 'user_id', 'title', 'description'],
+      required: ['project_id', 'user_id', 'title', 'description'],
 
       properties: {
         id: { type: 'integer' },

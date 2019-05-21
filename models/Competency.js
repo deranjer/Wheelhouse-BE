@@ -9,7 +9,7 @@ class Competency extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['id', 'tag'],
+      required: ['tag'],
 
       properties: {
         id: { type: 'integer' },

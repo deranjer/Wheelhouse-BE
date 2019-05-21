@@ -10,7 +10,7 @@ class UserCompetency extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['id', 'user_id', 'competency_id'],
+      required: ['user_id', 'competency_id'],
 
       properties: {
         id: { type: 'integer' },

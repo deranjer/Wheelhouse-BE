@@ -10,7 +10,7 @@ class ProjectCategory extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['id', 'project_id', 'category_id'],
+      required: ['project_id', 'category_id'],
 
       properties: {
         id: { type: 'integer' },

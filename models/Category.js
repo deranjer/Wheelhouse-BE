@@ -1,5 +1,4 @@
 const { Model } = require('objection');
-const Project = require('./Project');
 
 class Category extends Model {
   static get tableName() {
@@ -9,7 +8,7 @@ class Category extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['id', 'tag'],
+      required: ['tag'],
 
       properties: {
         id: { type: 'integer' },
@@ -19,6 +18,9 @@ class Category extends Model {
   }
 
   static get relationMappings() {
+    // eslint-disable-next-line global-require
+    const Project = require('./Project');
+
     return {
       projects: {
         relation: Model.ManyToManyRelation,
