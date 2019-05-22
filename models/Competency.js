@@ -1,5 +1,5 @@
+/* eslint-disable global-require */
 const { Model } = require('objection');
-const User = require('objection');
 
 class Competency extends Model {
   static get tableName() {
@@ -19,6 +19,8 @@ class Competency extends Model {
   }
 
   static get relationMappings() {
+    const User = require('./User');
+
     return {
       users: {
         relation: Model.ManyToManyRelation,
