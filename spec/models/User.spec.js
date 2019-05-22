@@ -266,4 +266,21 @@ describe('User Objection Model', () => {
       done();
     });
   });
+
+  describe('user.$relatedQuery("permission")', () => {
+    it('Should return the permission associated with this user', async (done) => {
+      const user = await User.query().insertGraph({
+        full_name: 'Josh G',
+        username: 'JoRyGu',
+        email: 'j@josh.net',
+        password: '12345678',
+        permissions_id: 1,
+        work_status: 'Employed',
+      });
+
+      const permission = await user.$relatedQuery('permission');
+      expect(permission.description).toBe('user');
+      done();
+    });
+  });
 });
