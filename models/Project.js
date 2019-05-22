@@ -1,5 +1,4 @@
 const { Model } = require('objection');
-const User = require('./User');
 const Position = require('./Position');
 const Milestone = require('./Milestone');
 const Category = require('./Category');
@@ -28,6 +27,9 @@ class Project extends Model {
   }
 
   static get relationMappings() {
+    // eslint-disable-next-line global-require
+    const User = require('./User');
+
     return {
       user: {
         relation: Model.BelongsToOneRelation,

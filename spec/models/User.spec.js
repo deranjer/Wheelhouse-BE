@@ -4,21 +4,26 @@ const { Model } = require('objection');
 const knexfile = require('../../knexfile').test;
 const knex = require('knex')(knexfile);
 const User = require('../../models/User');
+const Project = require('../../models/Project');
+const Competency = require('../../models/Competency');
+const UserCompetency = require('../../models/UserCompentency');
 
 describe('User Objection Model', () => {
-  beforeAll((done) => {
+  beforeAll(async (done) => {
+    await knex.migrate.latest();
     Model.knex(knex);
     done();
   });
 
   beforeEach(async (done) => {
-    await knex.migrate.rollback();
-    await knex.migrate.latest();
+    await knex.raw('TRUNCATE TABLE users, projects CASCADE');
+    await knex.raw('ALTER SEQUENCE users_id_seq RESTART WITH 1');
     done();
   });
 
-  afterAll(async (done) => {
-    knex.destroy();
+  afterEach(async (done) => {
+    await knex.raw('TRUNCATE TABLE users, projects CASCADE');
+    await knex.raw('ALTER SEQUENCE users_id_seq RESTART WITH 1');
     done();
   });
 
@@ -186,6 +191,78 @@ describe('User Objection Model', () => {
 
       const user = await User.query().findById('1');
       expect(user.full_name).toBe('Josh G');
+      done();
+    });
+  });
+
+  describe('user.$relatedQuery("projects")', () => {
+    it('Should return a list of instances projects associated with the user', async (done) => {
+      const user = await User.query().insertGraph({
+        full_name: 'Josh G',
+        username: 'JoRyGu',
+        email: 'j@josh.net',
+        password: '12345678',
+        work_status: 'Employed',
+      });
+
+      await Project.query().insertGraph({
+        user_id: 1,
+        name: 'Cool Project',
+        created_at: new Date(),
+      });
+
+      const projects = await user.$relatedQuery('projects');
+      expect(projects[0].id).toBe(1);
+      done();
+    });
+  });
+
+  describe('user.$relatedQuery("competencies")', () => {
+    it('Should return a list of instances of competencies related to the user', async (done) => {
+      const user = await User.query().insertGraph({
+        full_name: 'Josh G',
+        username: 'JoRyGu',
+        email: 'j@josh.net',
+        password: '12345678',
+        work_status: 'Employed',
+      });
+
+      await Competency.query().insertGraph([
+        { tag: 'C#' },
+        { tag: 'Java' },
+        { tag: 'JavaScript' },
+      ]);
+
+      await UserCompetency.query().insertGraph([
+        { user_id: 1, competency_id: 1 },
+        { user_id: 1, competency_id: 2 },
+        { user_id: 1, competency_id: 3 },
+      ]);
+
+      const tags = await user.$relatedQuery('competencies');
+      expect(tags[0].tag).toBe('C#');
+      done();
+    });
+  });
+
+  describe('user.$relatedQuery("competencies").relate()', () => {
+    it('Should relate the user instance to an existing competency', async (done) => {
+      await Competency.query().insertGraph([
+        { tag: 'C#' },
+        { tag: 'React' },
+      ]);
+
+      const user = await User.query().insertGraph({
+        full_name: 'Josh G',
+        username: 'JoRyGu',
+        email: 'j@josh.net',
+        password: '12345678',
+        work_status: 'Employed',
+      });
+
+      await user.$relatedQuery('competencies').relate([1, 2]);
+      const competencies = await user.getCompetencies();
+      expect(competencies.length).toBe(2);
       done();
     });
   });

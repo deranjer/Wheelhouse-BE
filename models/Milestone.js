@@ -1,5 +1,4 @@
 const { Model } = require('objection');
-const Project = require('./Project');
 
 class Milestone extends Model {
   static get tableName() {
@@ -22,12 +21,17 @@ class Milestone extends Model {
   }
 
   static get relationMappings() {
+    // eslint-disable-next-line global-require
+    const Project = require('./Project');
+
     return {
-      relation: Model.BelongsToOneRelation,
-      modelClass: Project,
-      join: {
-        from: 'milestones.project_id',
-        to: 'projects.id',
+      project: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Project,
+        join: {
+          from: 'milestones.project_id',
+          to: 'projects.id',
+        },
       },
     };
   }

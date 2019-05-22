@@ -1,6 +1,5 @@
+/* eslint-disable global-require */
 const { Model } = require('objection');
-const Project = require('./Project');
-const User = require('./User');
 
 class Position extends Model {
   static get tableName() {
@@ -10,12 +9,12 @@ class Position extends Model {
   static get jsonSchema() {
     return {
       type: 'object',
-      required: ['id', 'project_id', 'user_id', 'title', 'description'],
+      required: ['project_id', 'title', 'description'],
 
       properties: {
         id: { type: 'integer' },
         project_id: { type: 'integer' },
-        user_id: { type: 'integer' },
+        user_id: { type: ['integer', 'null'] },
         title: { type: 'string', minLength: 1, maxLength: 40 },
         description: { type: 'string', minLength: 1, maxLength: 300 },
       },
@@ -23,6 +22,10 @@ class Position extends Model {
   }
 
   static get relationMappings() {
+    const Project = require('./Project');
+    const User = require('./User');
+
+
     return {
       project: {
         relation: Model.BelongsToOneRelation,
