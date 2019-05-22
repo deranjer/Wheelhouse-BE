@@ -60,6 +60,11 @@ class User extends Model {
       },
     };
   }
+
+  async getCompetencies() {
+    const competencies = await this.$relatedQuery('competencies');
+    return competencies;
+  }
 }
 
 module.exports = User;

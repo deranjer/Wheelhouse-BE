@@ -5,6 +5,8 @@ const knexfile = require('../../knexfile').test;
 const knex = require('knex')(knexfile);
 const User = require('../../models/User');
 const Project = require('../../models/Project');
+const Competency = require('../../models/Competency');
+const UserCompetency = require('../../models/UserCompentency');
 
 describe('User Objection Model', () => {
   beforeAll(async (done) => {
@@ -210,9 +212,57 @@ describe('User Objection Model', () => {
       });
 
       const projects = await user.$relatedQuery('projects');
-
       expect(projects[0].id).toBe(1);
+      done();
+    });
+  });
 
+  describe('user.$relatedQuery("competencies")', () => {
+    it('Should return a list of instances of competencies related to the user', async (done) => {
+      const user = await User.query().insertGraph({
+        full_name: 'Josh G',
+        username: 'JoRyGu',
+        email: 'j@josh.net',
+        password: '12345678',
+        work_status: 'Employed',
+      });
+
+      await Competency.query().insertGraph([
+        { tag: 'C#' },
+        { tag: 'Java' },
+        { tag: 'JavaScript' },
+      ]);
+
+      await UserCompetency.query().insertGraph([
+        { user_id: 1, competency_id: 1 },
+        { user_id: 1, competency_id: 2 },
+        { user_id: 1, competency_id: 3 },
+      ]);
+
+      const tags = await user.$relatedQuery('competencies');
+      expect(tags[0].tag).toBe('C#');
+      done();
+    });
+  });
+
+  describe('user.$relatedQuery("competencies").relate()', () => {
+    it('Should relate the user instance to an existing competency', async (done) => {
+      await Competency.query().insertGraph([
+        { tag: 'C#' },
+        { tag: 'React' },
+      ]);
+
+      const user = await User.query().insertGraph({
+        full_name: 'Josh G',
+        username: 'JoRyGu',
+        email: 'j@josh.net',
+        password: '12345678',
+        work_status: 'Employed',
+      });
+
+      await user.$relatedQuery('competencies').relate([1, 2]);
+      const competencies = await user.getCompetencies();
+      expect(competencies.length).toBe(2);
       done();
     });
   });
