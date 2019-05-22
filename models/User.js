@@ -27,6 +27,9 @@ class User extends Model {
   }
 
   static get relationMappings() {
+    // eslint-disable-next-line global-require
+    const Permission = require('./Permission');
+
     return {
       projects: {
         relation: Model.HasManyRelation,
@@ -56,6 +59,15 @@ class User extends Model {
         join: {
           from: 'users.id',
           to: 'positions.user_id',
+        },
+      },
+
+      permission: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Permission,
+        join: {
+          from: 'users.permissions_id',
+          to: 'permissions.id',
         },
       },
     };
