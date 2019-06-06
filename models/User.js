@@ -18,10 +18,10 @@ class User extends Model {
         full_name: { type: 'string', minLength: 1, maxLength: 40 },
         username: { type: 'string', minLength: 1, maxLength: 40 },
         password: { type: 'string', minLength: 8, maxLength: 255 },
-        profile_photo_url: { type: 'string', minLength: 1, maxLength: 255 },
-        header_photo_url: { type: 'string', minLength: 1, maxLength: 255 },
+        profile_photo_url: { type: ['string', 'null'], minLength: 1, maxLength: 255 },
+        header_photo_url: { type: ['string', 'null'], minLength: 1, maxLength: 255 },
         work_status: { type: 'string', minLength: 1, maxLength: 40 },
-        bio: { type: 'string', minLength: 1, maxLength: 600 },
+        bio: { type: ['string', 'null'], minLength: 1, maxLength: 600 },
       },
     };
   }
