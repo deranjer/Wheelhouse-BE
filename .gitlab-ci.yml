@@ -30,15 +30,3 @@ test_suite:
   - npm test
   only:
   - master
- 
-variables:
- IMAGE_TAG: deranjer/wheelhouse-be:$CI_COMMIT_TAG
- 
-before_script:
- - docker login -u $CI_REGISTRY_USER -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
- 
-build:
- stage: build
- script:
-  - docker build -t $IMAGE_TAG .
-  - docker push $IMAGE_TAG
