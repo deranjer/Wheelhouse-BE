@@ -1,11 +1,15 @@
 package main
 
 import (
+	"WheelhouseBE/handlers"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/cors"
@@ -13,10 +17,21 @@ import (
 	"github.com/go-chi/render"
 )
 
-var routes = flag.Bool("routes", false, "Generate router documentation")
+// Create a struct that models the structure of a user, both in the request body, and in the DB
+type Credentials struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+var routes = flag.Bool("routes", false, "Generate route documentation")
+
+var sessionManager *scs.SessionManager
 
 func main() {
 	flag.Parse()
+	// Initialize a new session manager and configure the session lifetime.
+	sessionManager = scs.New()
+	sessionManager.Lifetime = 24 * time.Hour
 	cors := cors.New(cors.Options{
 		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: []string{"*"},
@@ -38,35 +53,52 @@ func main() {
 		w.Write([]byte("Welcome to the root of WheelhouseBE"))
 	})
 
+	r.Post("/login", UserLogin)
+
 	r.Route("/user", func(r chi.Router) {
-		r.Get("/{userID}", GetUserByID) //GET /user/123
+		r.Post("/", handlers.CreateUser)
+		r.Route("/{userID}", func(r chi.Router) {
+			//r.Use(handlers.UserCtx)
+			r.Get("/", handlers.GetUserByID)
+			r.Put("/", handlers.UpdateUserByID)
+			r.Delete("/", handlers.DeleteUserByID)
+		})
 	})
 
 	if *routes { //If asking for routes to be printed to .md file
-		routeDocs := docgen.MarkdownRoutesDoc(r, docgen.MarkdownOpts{
-			ProjectPath: "",
-			Intro:       "Generated Docs for WheelhouseBE",
-		})
-		file, err := os.Create("RouteDocs.md")
-		if err != nil {
-			fmt.Println("Error creating file")
-		}
-		bytesWritten, err := file.WriteString(routeDocs)
-		if err != nil {
-			fmt.Println("Error writing to file")
-		} else {
-			fmt.Println(bytesWritten, " bytes written to file")
-		}
-
-		return
-
+		GenerateDocs(r)
 	}
-
-	http.ListenAndServe(":5000", r)
-
+	http.ListenAndServe(":5000", sessionManager.LoadAndSave(r))
 }
 
-//GetUserByID Get user from database by ID
-func GetUserByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Request user by ID"))
+//GenerateDocs prints out the API to a markdown file
+func GenerateDocs(r *chi.Mux) {
+	routeDocs := docgen.MarkdownRoutesDoc(r, docgen.MarkdownOpts{
+		ProjectPath: "",
+		Intro:       "Generated Docs for WheelhouseBE",
+	})
+	file, err := os.Create("RouteDocs.md")
+	if err != nil {
+		fmt.Println("Error creating file")
+	}
+	bytesWritten, err := file.WriteString(routeDocs)
+	if err != nil {
+		fmt.Println("Error writing to file")
+	} else {
+		fmt.Println(bytesWritten, "bytes written to RouteDocs.md")
+	}
+
+	return
+}
+
+//UserLogin handles the user login, creates the session cookie
+func UserLogin(w http.ResponseWriter, r *http.Request) {
+	var creds Credentials
+	err := json.NewDecoder(r.Body).Decode(&creds) //Take the credentials from post and decode them into the struct
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	//TODO verify the username and password against the database to make sure it works
+
 }
