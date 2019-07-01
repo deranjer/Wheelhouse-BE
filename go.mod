@@ -1,3 +1,5 @@
+// +heroku install .
+
 module WheelhouseBE
 
 go 1.12

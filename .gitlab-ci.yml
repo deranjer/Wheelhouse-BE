@@ -3,6 +3,11 @@
 # https://hub.docker.com/r/library/node/tags/
 image: golang:1.12.6-stretch
 
+stages:
+ - vetting
+ - tests
+ - build
+
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
 # Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
@@ -21,18 +26,36 @@ variables:
 cache:
   paths:
   - .cache
-  
-job1:
-    script:
-     - mkdir -p .cache
-     - export GOPATH="$CI_PROJECT_DIR/.cache"
-     - go mod download
-     - go run main.go
-    only:
-     - master
 
-test_suite:
+lint:
+  image: golang
+  stage: vetting
   script:
-  - go test
-  only:
-  - master
+    - go get github.com/golang/lint/golint
+    - golint -set_exit_status ./...
+  allow_failure: true
+
+vet:
+  image: golang
+  stage: vetting
+  script:
+    - go vet ./...
+
+unit_race_tests:
+  image: golang
+  stage: tests
+  script:
+    - go test -race ./...
+
+# development:
+#   stage: development
+#   script:
+#     - apt-get update -qy
+#     - apt-get install -y ruby-dev
+#     - gem install dpl
+#     - dpl --provider=heroku --app=gitlab-heroku-deploy-staging --api-key=$HEROKU_API_KEY
+#   environment:
+#     name: Staging
+#     url: https://wheelhouseapp.herokuapp.com/
+#   only:
+#     - master

@@ -49,9 +49,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Welcome to the root of WheelhouseBE"))
-	})
+	r.Get("/", APIRoot)
 
 	r.Post("/login", UserLogin)
 
@@ -68,7 +66,12 @@ func main() {
 	if *routes { //If asking for routes to be printed to .md file
 		GenerateDocs(r)
 	}
-	http.ListenAndServe(":5000", sessionManager.LoadAndSave(r))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5000"
+	}
+	fmt.Printf("Starting server on port %v\n", port)
+	http.ListenAndServe(":"+port, sessionManager.LoadAndSave(r))
 }
 
 //GenerateDocs prints out the API to a markdown file
@@ -101,4 +104,9 @@ func UserLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	//TODO verify the username and password against the database to make sure it works
 
+}
+
+//APIRoot displays a welcome message to the API
+func APIRoot(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Welcome to the root of WheelhouseBE"))
 }
