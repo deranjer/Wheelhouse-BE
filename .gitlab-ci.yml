@@ -1,7 +1,12 @@
 # This file is a template, and might need editing before it works on your project.
 # Official framework image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/node/tags/
-image: node:10.15.3-stretch
+image: golang:1.12.6-stretch
+
+stages:
+ - vetting
+ - tests
+ - build
 
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
@@ -20,13 +25,37 @@ variables:
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
 cache:
   paths:
-  - node_modules/
+  - .cache
 
-test_suite:
+lint:
+  image: golang
+  stage: vetting
   script:
-  - npm install
-  - npm i -g knex
-  - knex migrate:latest --env test
-  - npm test
-  only:
-  - master
+    - go get github.com/golang/lint/golint
+    - golint -set_exit_status ./...
+  allow_failure: true
+
+vet:
+  image: golang
+  stage: vetting
+  script:
+    - go vet ./...
+
+unit_race_tests:
+  image: golang
+  stage: tests
+  script:
+    - go test -race ./...
+
+# development:
+#   stage: development
+#   script:
+#     - apt-get update -qy
+#     - apt-get install -y ruby-dev
+#     - gem install dpl
+#     - dpl --provider=heroku --app=gitlab-heroku-deploy-staging --api-key=$HEROKU_API_KEY
+#   environment:
+#     name: Staging
+#     url: https://wheelhouseapp.herokuapp.com/
+#   only:
+#     - master
