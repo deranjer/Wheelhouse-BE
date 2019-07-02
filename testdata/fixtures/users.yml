@@ -1,0 +1,11 @@
+#users.yml
+-id: 1
+-full_name: "Test User"
+-username: "testuser"
+-email: "testemail@domain.com"
+-password: "SaltedPassword"
+-profile_photo_url: "varchar255"
+-header_photo_url: "varchar255"
+-work_status: "Available"
+-bio: "Short bio about user"
+-permissions_id: 15
