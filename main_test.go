@@ -17,23 +17,23 @@ var (
 	fixtures *testfixtures.Context
 )
 
-func DBSetup(m *testing.M) {
-	var err error
-	connStr := "user=postgres password=postgres port=5432 host=postgres dbname=wheelhouse-test "
-	db, err = sql.Open("postgres", connStr)
+func TestMain(m *testing.M) {
+	connStr := "user=postgres password=Password1 port=5432 host=192.168.1.9 dbname=wheelhouse-test"
+	//connStr := "user=postgres password=postgres port=5432 host=postgres dbname=wheelhouse-test" //gitlab test
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Unable to open database", err)
 	}
 	fixtures, err = testfixtures.NewFolder(db, &testfixtures.PostgreSQL{}, "testdata/fixtures")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failure adding fixtures", err)
 	}
 	os.Exit(m.Run())
 }
 
 func PrepareTestDatabase() {
 	if err := fixtures.Load(); err != nil {
-		log.Fatal(err)
+		log.Fatal("Failure loading fixtures", err)
 	}
 }
 
@@ -41,7 +41,7 @@ func TestDBConnection(t *testing.T) {
 	PrepareTestDatabase()
 	_, err := db.Query(`SELECT full_name FROM users WHERE id = 1`)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error Running Query Select for Users: ", err)
 	}
 
 }

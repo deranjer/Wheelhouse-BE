@@ -12,6 +12,10 @@ require (
 	github.com/go-chi/cors v1.0.0
 	github.com/go-chi/docgen v1.0.5
 	github.com/go-chi/render v1.0.1
+	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
+	github.com/jackc/pgtype v0.0.0-20190608164547-4e0ed911f557 // indirect
+	github.com/jackc/pgx v3.5.0+incompatible
+	github.com/jackc/pgxtype v0.0.0-20170219040033-5db73fc94504 // indirect
 	github.com/lib/pq v1.1.1
 	github.com/mattn/go-oci8 v0.0.0-20190524004114-abcafa411cc8 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
