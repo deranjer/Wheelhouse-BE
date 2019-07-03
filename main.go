@@ -2,9 +2,11 @@ package main
 
 import (
 	"WheelhouseBE/handlers"
+	"database/sql"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -15,6 +17,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-chi/docgen"
 	"github.com/go-chi/render"
+	_ "github.com/lib/pq"
 )
 
 // Create a struct that models the structure of a user, both in the request body, and in the DB
@@ -23,11 +26,15 @@ type Credentials struct {
 	Username string `json:"username"`
 }
 
-var routes = flag.Bool("routes", false, "Generate route documentation")
-
-var sessionManager *scs.SessionManager
+var (
+	routes         = flag.Bool("routes", false, "Generate route documentation")
+	sessionManager *scs.SessionManager
+	connStr        = "user=postgres password=Password1 port=5432 host=192.168.1.9 dbname=wheelhouse-test"
+	DB             *sql.DB
+)
 
 func main() {
+	databaseSetup() // setting up the connection to database
 	flag.Parse()
 	// Initialize a new session manager and configure the session lifetime.
 	sessionManager = scs.New()
@@ -49,9 +56,9 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	r.Get("/", APIRoot)
+	r.Get("/", aPIRoot)
 
-	r.Post("/login", UserLogin)
+	r.Post("/login", userLogin)
 
 	r.Route("/user", func(r chi.Router) {
 		r.Post("/", handlers.CreateUser)
@@ -95,18 +102,33 @@ func GenerateDocs(r *chi.Mux) {
 }
 
 //UserLogin handles the user login, creates the session cookie
-func UserLogin(w http.ResponseWriter, r *http.Request) {
+func userLogin(w http.ResponseWriter, r *http.Request) {
 	var creds Credentials
 	err := json.NewDecoder(r.Body).Decode(&creds) //Take the credentials from post and decode them into the struct
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	//TODO verify the username and password against the database to make sure it works
-
+	result, err := DB.Query(`SELECT full_name FROM users WHERE id = 1`) //TODO verify the username and password against the database to make sure it works
+	if err != nil {
+		log.Print("Error Running Query Select for Users: ", err)
+	} else {
+		log.Print("Result of query", result)
+	}
 }
 
 //APIRoot displays a welcome message to the API
-func APIRoot(w http.ResponseWriter, r *http.Request) {
+func aPIRoot(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Welcome to the root of WheelhouseBE"))
+}
+
+func databaseSetup() {
+	var err error
+	DB, err = sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal("Unable to open database", err)
+	} else {
+		fmt.Println("Database Connection Established")
+	}
+	handlers.DB = DB //injecting the database connection into handlers
 }

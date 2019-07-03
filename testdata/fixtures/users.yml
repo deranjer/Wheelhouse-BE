@@ -8,4 +8,3 @@
   header_photo_url: "varchar255"
   work_status: "Available"
   bio: "Short bio about user"
-  permissions_id: 15

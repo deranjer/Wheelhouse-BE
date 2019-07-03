@@ -1,6 +1,5 @@
 #projects.yml
 - id: 1
-  user_id: 1
   name: test Project
   logo_url: varchar255
   header_photo_url: varchar255

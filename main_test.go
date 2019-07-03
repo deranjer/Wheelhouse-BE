@@ -2,10 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	_ "github.com/lib/pq"
@@ -13,27 +16,44 @@ import (
 )
 
 var (
-	db       *sql.DB
 	fixtures *testfixtures.Context
 )
 
 func TestMain(m *testing.M) {
-	connStr := "user=postgres password=Password1 port=5432 host=192.168.1.9 dbname=wheelhouse-test"
+	var err error
+	connStr = "user=postgres password=Password1 port=5432 host=192.168.1.9 dbname=wheelhouse-test"
 	//connStr := "user=postgres password=postgres port=5432 host=postgres dbname=wheelhouse-test" //gitlab test
-	db, err := sql.Open("postgres", connStr)
+	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Unable to open database", err)
+	} else {
+		fmt.Println("Database Connection Established")
 	}
 	fixtures, err = testfixtures.NewFolder(db, &testfixtures.PostgreSQL{}, "testdata/fixtures")
 	if err != nil {
 		log.Fatal("Failure adding fixtures", err)
+	}
+	file, err := ioutil.ReadFile("testdata/WheelhouseDB_Setup.sql")
+	if err != nil {
+		log.Fatal("Unable to read in sql file", err)
+	}
+	requests := strings.Split(string(file), ";\n")
+	for _, request := range requests {
+		_, err := db.Exec(request)
+		if err != nil {
+			fmt.Println("Unable to run SQL command, potential error: ", err)
+		} else {
+			fmt.Println("Success running SQL commands")
+		}
 	}
 	os.Exit(m.Run())
 }
 
 func PrepareTestDatabase() {
 	if err := fixtures.Load(); err != nil {
-		log.Fatal("Failure loading fixtures", err)
+		log.Fatal("Failure loading fixtures ", err)
+	} else {
+		fmt.Println("Loaded fixtures...")
 	}
 }
 
@@ -57,7 +77,7 @@ func APIBaseGet(t *testing.T, uri string, expected interface{}) {
 	}
 	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(APIRoot)
+	handler := http.HandlerFunc(aPIRoot)
 
 	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
 	// directly and pass in our Request and ResponseRecorder.

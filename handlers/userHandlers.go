@@ -1,7 +1,16 @@
 package handlers
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
+	"strings"
+
+	_ "github.com/lib/pq"
+)
+
+var (
+	DB *sql.DB
 )
 
 // UserCtx middleware is used to load a User object from
@@ -15,7 +24,19 @@ func UserCtx(next http.Handler) http.Handler {
 
 //GetUserByID Get user from database by ID
 func GetUserByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Request user by ID"))
+
+	result, err := DB.Query(`SELECT full_name FROM users WHERE id = 1`) //TODO verify the username and password against the database to make sure it works
+	if err != nil {
+		log.Print("Error Running Query Select for Users: ", err)
+	} else {
+		log.Print("Result of query", result)
+	}
+	singleColumn, err := result.Columns()
+	if err != nil {
+		log.Print("Error with results")
+	}
+	singleColumnString := strings.Join(singleColumn, "")
+	w.Write([]byte(singleColumnString))
 }
 
 //DeleteUserByID deletes a user from the database by ID
