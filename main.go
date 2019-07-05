@@ -20,7 +20,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Create a struct that models the structure of a user, both in the request body, and in the DB
+// Credentials will create a struct that models the structure of a user, both in the request body, and in the DB
 type Credentials struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
@@ -30,7 +30,8 @@ var (
 	routes         = flag.Bool("routes", false, "Generate route documentation")
 	sessionManager *scs.SessionManager
 	connStr        = "user=postgres password=Password1 port=5432 host=192.168.1.9 dbname=wheelhouse-test"
-	DB             *sql.DB
+	//DB is the database connection that will be injected into other packages
+	DB *sql.DB
 )
 
 func main() {

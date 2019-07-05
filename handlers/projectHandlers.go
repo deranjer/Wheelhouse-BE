@@ -15,8 +15,8 @@ type projectData struct {
 	UserID         string    `json:"user_id"`
 	LogoURL        string    `json:"logo_url"`
 	HeaderPhotoURL string    `json:"header_photo_url"`
-	tagline        string    `json:"tagline"`
-	description    string    `json:"description"`
+	Tagline        string    `json:"tagline"`
+	Description    string    `json:"description"`
 	CreatedAt      time.Time `json:"created_at"`
 }
 
@@ -52,7 +52,7 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 	sqlStatement := `
 	INSERT INTO users (name, user_id, logo_url, header_photo_url, tagline, description, created_at)
 	VALUES ($1, $2, $3, $4, $5, $6)`
-	result, err := DB.Exec(sqlStatement, newProject.Name, newProject.UserID, newProject.LogoURL, newProject.HeaderPhotoURL, newProject.tagline, newProject.description, newProject.CreatedAt)
+	result, err := DB.Exec(sqlStatement, newProject.Name, newProject.UserID, newProject.LogoURL, newProject.HeaderPhotoURL, newProject.Tagline, newProject.Description, newProject.CreatedAt)
 	if err != nil {
 		panic(err)
 	} else {
