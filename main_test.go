@@ -23,7 +23,7 @@ var (
 func TestMain(m *testing.M) {
 	var err error
 	//connStr = "user=postgres password=Password1 port=5432 host=192.168.1.9 dbname=wheelhouse-test"
-	connStr := "user=postgres password=postgres port=5432 host=postgres dbname=wheelhouse-test" //gitlab test
+	connStr := "user=postgres password=postgres port=5432 host=postgres dbname=wheelhouse-test sslmode=disable" //gitlab test
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Unable to open database", err)
