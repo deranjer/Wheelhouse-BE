@@ -18,9 +18,10 @@ import (
 	"github.com/go-chi/docgen"
 	"github.com/go-chi/render"
 	_ "github.com/lib/pq"
+
 )
 
-// Credentials will create a struct that models the structure of a user, both in the request body, and in the DB
+// Create a struct that models the structure of a user, both in the request body, and in the DB
 type Credentials struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
@@ -29,9 +30,8 @@ type Credentials struct {
 var (
 	routes         = flag.Bool("routes", false, "Generate route documentation")
 	sessionManager *scs.SessionManager
-	connStr        = "user=postgres password=Password1 port=5432 host=192.168.1.9 dbname=wheelhouse-test"
-	//DB is the database connection that will be injected into other packages
-	DB *sql.DB
+	connStr        = "user=postgres password=yourpassword. port=5432 host=localhost dbname=wheelhouse sslmode=disable"
+	DB             *sql.DB
 )
 
 func main() {
@@ -127,9 +127,14 @@ func databaseSetup() {
 	var err error
 	DB, err = sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatal("Unable to open database", err)
-	} else {
-		fmt.Println("Database Connection Established")
-	}
+		panic(err)
+	} 
+	
 	handlers.DB = DB //injecting the database connection into handlers
+	defer DB.Close()
+	err = DB.Ping()
+	if err != nil {
+		panic(err)
+    }
+    fmt.Println("Connected to database")
 }
