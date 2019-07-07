@@ -18,10 +18,9 @@ import (
 	"github.com/go-chi/docgen"
 	"github.com/go-chi/render"
 	_ "github.com/lib/pq"
-
 )
 
-// Create a struct that models the structure of a user, both in the request body, and in the DB
+// Credentials creates a struct that models the structure of a user, both in the request body, and in the DB
 type Credentials struct {
 	Password string `json:"password"`
 	Username string `json:"username"`
@@ -30,12 +29,14 @@ type Credentials struct {
 var (
 	routes         = flag.Bool("routes", false, "Generate route documentation")
 	sessionManager *scs.SessionManager
-	connStr        = "user=postgres password=yourpassword. port=5432 host=localhost dbname=wheelhouse sslmode=disable"
-	DB             *sql.DB
+	connStr        = "user=postgres password=Password1 port=5432 host=192.168.1.9 dbname=wheelhouse-test sslmode=disable"
+	//DB is the main database connection that is set globally and injected into sub packages
+	DB *sql.DB
 )
 
 func main() {
-	databaseSetup() // setting up the connection to database
+	databaseSetup()  // setting up the connection to database
+	defer DB.Close() // close the DB when the server closes.
 	flag.Parse()
 	// Initialize a new session manager and configure the session lifetime.
 	sessionManager = scs.New()
@@ -90,13 +91,13 @@ func GenerateDocs(r *chi.Mux) {
 	})
 	file, err := os.Create("RouteDocs.md")
 	if err != nil {
-		fmt.Println("Error creating file")
+		log.Print("Error creating file")
 	}
 	bytesWritten, err := file.WriteString(routeDocs)
 	if err != nil {
-		fmt.Println("Error writing to file")
+		log.Print("Error writing to file")
 	} else {
-		fmt.Println(bytesWritten, "bytes written to RouteDocs.md")
+		log.Print(bytesWritten, "bytes written to RouteDocs.md")
 	}
 
 	return
@@ -127,14 +128,13 @@ func databaseSetup() {
 	var err error
 	DB, err = sql.Open("postgres", connStr)
 	if err != nil {
-		panic(err)
-	} 
-	
+		log.Fatal("Error parsing SQL database connection string: ", err)
+	}
+
 	handlers.DB = DB //injecting the database connection into handlers
-	defer DB.Close()
 	err = DB.Ping()
 	if err != nil {
-		panic(err)
-    }
-    fmt.Println("Connected to database")
+		log.Fatal("Error pinging database: ", err)
+	}
+	log.Print("Connected to database")
 }

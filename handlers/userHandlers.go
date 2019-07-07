@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 
 	//Need pq to read/write from sql
 	_ "github.com/lib/pq"
@@ -19,6 +18,7 @@ var (
 )
 
 type userData struct {
+	ID              int    `json:id`
 	FullName        string `json:"full_name"`
 	Username        string `json:"username"`
 	Email           string `json:"email"`
@@ -27,6 +27,7 @@ type userData struct {
 	HeaderPhotoURL  string `json:"header_photo_url"`
 	WorkStatus      string `json:"work_status"`
 	Bio             string `json:"bio"`
+	Tagline         string `json:"tagline"`
 }
 
 // UserCtx middleware is used to load a User object from
@@ -40,19 +41,15 @@ func UserCtx(next http.Handler) http.Handler {
 
 //GetUserByID Get user from database by ID
 func GetUserByID(w http.ResponseWriter, r *http.Request) {
-
-	result, err := DB.Query(`SELECT full_name FROM users WHERE id = 1`) //TODO verify the username and password against the database to make sure it works
+	getUser := userData{}
+	err := DB.QueryRow(`SELECT full_name, username, profile_photo_url, header_photo_url, work_status, bio, tagline FROM users WHERE id = $1`, 1).Scan(&getUser.FullName, &getUser.Username, &getUser.ProfilePhotoURL, &getUser.HeaderPhotoURL, &getUser.WorkStatus, &getUser.Bio, &getUser.Tagline) //TODO verify the username and password against the database to make sure it works
 	if err != nil {
 		log.Print("Error Running Query Select for Users: ", err)
 	} else {
-		log.Print("Result of query", result)
+		log.Print("Result of query", getUser.FullName)
 	}
-	singleColumn, err := result.Columns()
-	if err != nil {
-		log.Print("Error with results")
-	}
-	singleColumnString := strings.Join(singleColumn, "")
-	w.Write([]byte(singleColumnString))
+	getUserJSON, err := json.Marshal(getUser)
+	w.Write([]byte(getUserJSON))
 }
 
 //DeleteUserByID deletes a user from the database by ID
