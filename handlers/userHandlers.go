@@ -18,7 +18,7 @@ var (
 )
 
 type userData struct {
-	ID              int    `json:id`
+	ID              int    `json:"id"`
 	FullName        string `json:"full_name"`
 	Username        string `json:"username"`
 	Email           string `json:"email"`
@@ -42,6 +42,7 @@ func UserCtx(next http.Handler) http.Handler {
 //GetUserByID Get user from database by ID
 func GetUserByID(w http.ResponseWriter, r *http.Request) {
 	getUser := userData{}
+	//Only need one result so doing a QueryRow... need to break this up since the pq package requires exact mappings
 	err := DB.QueryRow(`SELECT full_name, username, profile_photo_url, header_photo_url, work_status, bio, tagline FROM users WHERE id = $1`, 1).Scan(&getUser.FullName, &getUser.Username, &getUser.ProfilePhotoURL, &getUser.HeaderPhotoURL, &getUser.WorkStatus, &getUser.Bio, &getUser.Tagline) //TODO verify the username and password against the database to make sure it works
 	if err != nil {
 		log.Print("Error Running Query Select for Users: ", err)

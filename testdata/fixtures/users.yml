@@ -8,3 +8,4 @@
   header_photo_url: "varchar255"
   work_status: "Available"
   bio: "Short bio about user"
+  tagline: "Here is a 240 varchar tagline"
