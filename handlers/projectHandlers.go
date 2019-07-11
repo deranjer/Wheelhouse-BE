@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -22,19 +21,15 @@ type projectData struct {
 
 //GetProjectByID Get user from database by ID
 func GetProjectByID(w http.ResponseWriter, r *http.Request) {
-
-	result, err := DB.Query(`SELECT full_name FROM users WHERE id = 1`) //TODO verify the username and password against the database to make sure it works
+	getProject := projectData{}
+	err := DB.QueryRow(`SELECT full_name, username, profile_photo_url, header_photo_url, work_status, bio, tagline FROM users WHERE id = $1`, 1).Scan(&getProject.Name, &getProject.UserID, &getProject.LogoURL, &getProject.HeaderPhotoURL, &getProject.Tagline, &getProject.Description, &getProject.CreatedAt) //TODO verify the username and password against the database to make sure it works
 	if err != nil {
-		log.Print("Error Running Query Select for Users: ", err)
+		log.Print("Error Running Query Select for Project: ", err)
 	} else {
-		log.Print("Result of query", result)
+		log.Print("Result of query", getProject.Name)
 	}
-	singleColumn, err := result.Columns()
-	if err != nil {
-		log.Print("Error with results")
-	}
-	singleColumnString := strings.Join(singleColumn, "")
-	w.Write([]byte(singleColumnString))
+	getProjectJSON, err := json.Marshal(getProject)
+	w.Write([]byte(getProjectJSON))
 }
 
 //CreateProject takes the data from client and generates a new project

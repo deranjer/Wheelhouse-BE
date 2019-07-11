@@ -18,7 +18,7 @@ var (
 )
 
 type userData struct {
-	ID              int    `json:id`
+	ID              int    `json:"id"`
 	FullName        string `json:"full_name"`
 	Username        string `json:"username"`
 	Email           string `json:"email"`
@@ -46,7 +46,7 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Print("Error Running Query Select for Users: ", err)
 	} else {
-		log.Print("Result of query", getUser.FullName)
+		log.Print("Query completed correctly for user: ", getUser.FullName)
 	}
 	getUserJSON, err := json.Marshal(getUser)
 	w.Write([]byte(getUserJSON))

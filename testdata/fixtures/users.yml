@@ -7,4 +7,5 @@
   profile_photo_url: "varchar255"
   header_photo_url: "varchar255"
   work_status: "Available"
-  bio: "Short bio about user"
+  bio: "Short bio about user, this one will be much longer than just a tagline"
+  tagline: "short tagline about user under 255 char"
