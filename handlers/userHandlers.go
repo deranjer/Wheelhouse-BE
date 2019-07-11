@@ -8,6 +8,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
+
 	//Need pq to read/write from sql
 	_ "github.com/lib/pq"
 )
@@ -42,12 +45,20 @@ func UserCtx(next http.Handler) http.Handler {
 //GetUserByID Get user from database by ID
 func GetUserByID(w http.ResponseWriter, r *http.Request) {
 	getUser := userData{}
-	err := DB.QueryRow(`SELECT full_name, username, profile_photo_url, header_photo_url, work_status, bio, tagline FROM users WHERE id = $1`, 1).Scan(&getUser.FullName, &getUser.Username, &getUser.ProfilePhotoURL, &getUser.HeaderPhotoURL, &getUser.WorkStatus, &getUser.Bio, &getUser.Tagline) //TODO verify the username and password against the database to make sure it works
+	userID := chi.URLParam(r, "userID")
+	err := validateRequest(userID) //In common.go, this is where we will add all our validation routines
+	if err != nil {
+		log.Print("Invalid User ID entered, stopping before database hit, error was: ", err, " Requested ID was: ", userID)
+		w.Write([]byte("Must enter a valid userID to perform a GET, hit error: " + err.Error())) //Might redirect user to their own homepage?  OR 404? Not sure.
+		return
+	}
+	err = DB.QueryRow(`SELECT full_name, username, profile_photo_url, header_photo_url, work_status, bio, tagline FROM users WHERE id = $1`, userID).Scan(&getUser.FullName, &getUser.Username, &getUser.ProfilePhotoURL, &getUser.HeaderPhotoURL, &getUser.WorkStatus, &getUser.Bio, &getUser.Tagline) //TODO verify the username and password against the database to make sure it works
 	if err != nil {
 		log.Print("Error Running Query Select for Users: ", err)
-	} else {
-		log.Print("Query completed correctly for user: ", getUser.FullName)
+		render.HTML(w, r, "This is a 404, we can't find that user ID: "+userID)
+		return
 	}
+	log.Print("Query completed correctly for user: ", getUser.FullName)
 	getUserJSON, err := json.Marshal(getUser)
 	w.Write([]byte(getUserJSON))
 }
