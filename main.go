@@ -73,7 +73,7 @@ func main() {
 	})
 	r.Route("/project", func(r chi.Router) {
 		r.Post("/", handlers.CreateProject)
-		r.Route("/{projectID", func(r chi.Router) {
+		r.Route("/{projectID}", func(r chi.Router) {
 			//r.Use(handlers.ProjectCtx)
 			r.Get("/", handlers.GetProjectByID)
 			r.Put("/", handlers.UpdateProjectByID)
