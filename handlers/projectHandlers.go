@@ -6,11 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strings"
 	"time"
+
+	"github.com/go-chi/chi"
+	"github.com/go-chi/render"
 )
 
 type projectData struct {
+	ID             int       `json:"id"`
 	Name           string    `json:"name"`
 	UserID         string    `json:"user_id"`
 	LogoURL        string    `json:"logo_url"`
@@ -22,19 +25,23 @@ type projectData struct {
 
 //GetProjectByID Get user from database by ID
 func GetProjectByID(w http.ResponseWriter, r *http.Request) {
-
-	result, err := DB.Query(`SELECT full_name FROM users WHERE id = 1`) //TODO verify the username and password against the database to make sure it works
+	getProject := projectData{}
+	projectID := chi.URLParam(r, "projectID")
+	err := validateRequest(projectID) //In common.go, this is where we will add all our validation routines
 	if err != nil {
-		log.Print("Error Running Query Select for Users: ", err)
-	} else {
-		log.Print("Result of query", result)
+		log.Print("Invalid User ID entered, stopping before database hit, error was: ", err, " Requested ID was: ", projectID)
+		w.Write([]byte("Must enter a valid userID to perform a GET, hit error: " + err.Error())) //Might redirect user to their own homepage?  OR 404? Not sure.
+		return
 	}
-	singleColumn, err := result.Columns()
+	err = DB.QueryRow(`SELECT name, logo_url, header_photo_url, tagline, description, created_at FROM projects WHERE id = $1`, 1).Scan(&getProject.Name, &getProject.LogoURL, &getProject.HeaderPhotoURL, &getProject.Tagline, &getProject.Description, &getProject.CreatedAt) //TODO verify the username and password against the database to make sure it works
 	if err != nil {
-		log.Print("Error with results")
+		log.Print("Error Running Query Select for Project: ", err)
+		render.HTML(w, r, "This is a 404 or error we can't find that project ID: "+projectID+err.Error())
+		return
 	}
-	singleColumnString := strings.Join(singleColumn, "")
-	w.Write([]byte(singleColumnString))
+	log.Print("Result of query", getProject.Name)
+	getProjectJSON, err := json.Marshal(getProject)
+	w.Write([]byte(getProjectJSON))
 }
 
 //CreateProject takes the data from client and generates a new project
@@ -58,4 +65,14 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("Sql Result", result)
 	}
+}
+
+//UpdateProjectByID deletes a user from the database by ID
+func UpdateProjectByID(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Update Project by ID"))
+}
+
+//DeleteProjectByID deletes a user from the database by ID
+func DeleteProjectByID(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Delete Project by ID"))
 }

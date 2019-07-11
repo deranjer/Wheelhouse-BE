@@ -71,6 +71,15 @@ func main() {
 			r.Delete("/", handlers.DeleteUserByID)
 		})
 	})
+	r.Route("/project", func(r chi.Router) {
+		r.Post("/", handlers.CreateProject)
+		r.Route("/{projectID}", func(r chi.Router) {
+			//r.Use(handlers.ProjectCtx)
+			r.Get("/", handlers.GetProjectByID)
+			r.Put("/", handlers.UpdateProjectByID)
+			r.Delete("/", handlers.DeleteProjectByID)
+		})
+	})
 
 	if *routes { //If asking for routes to be printed to .md file
 		GenerateDocs(r)
