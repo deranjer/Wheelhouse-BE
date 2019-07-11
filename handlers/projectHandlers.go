@@ -54,3 +54,13 @@ func CreateProject(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Sql Result", result)
 	}
 }
+
+//DeleteUserByID deletes a user from the database by ID
+func UpdateProjectByID(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Update Project by ID"))
+}
+
+//DeleteUserByID deletes a user from the database by ID
+func DeleteProjectByID(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Delete Project by ID"))
+}
