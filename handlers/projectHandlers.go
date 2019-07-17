@@ -33,7 +33,7 @@ func GetProjectByID(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Must enter a valid userID to perform a GET, hit error: " + err.Error())) //Might redirect user to their own homepage?  OR 404? Not sure.
 		return
 	}
-	err = DB.QueryRow(`SELECT name, logo_url, header_photo_url, tagline, description, created_at FROM projects WHERE id = $1`, 1).Scan(&getProject.Name, &getProject.LogoURL, &getProject.HeaderPhotoURL, &getProject.Tagline, &getProject.Description, &getProject.CreatedAt) //TODO verify the username and password against the database to make sure it works
+	err = DB.QueryRow(`SELECT name, logo_url, header_photo_url, tagline, description, created_at FROM projects WHERE id = $1`, projectID).Scan(&getProject.Name, &getProject.LogoURL, &getProject.HeaderPhotoURL, &getProject.Tagline, &getProject.Description, &getProject.CreatedAt) //TODO verify the username and password against the database to make sure it works
 	if err != nil {
 		log.Print("Error Running Query Select for Project: ", err)
 		render.HTML(w, r, "This is a 404 or error we can't find that project ID: "+projectID+err.Error())

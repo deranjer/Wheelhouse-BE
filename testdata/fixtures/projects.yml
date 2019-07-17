@@ -1,6 +1,7 @@
 #projects.yml
 - id: 1
   name: test Project
+  user_id: 1
   logo_url: varchar255
   header_photo_url: varchar255
   tagline: small tagline about project

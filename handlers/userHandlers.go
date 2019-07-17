@@ -44,7 +44,7 @@ func UserCtx(next http.Handler) http.Handler {
 
 //GetUserByID Get user from database by ID
 func GetUserByID(w http.ResponseWriter, r *http.Request) {
-	getUser := userData{}
+	getUser := &userData{}
 	userID := chi.URLParam(r, "userID")
 	err := validateRequest(userID) //In common.go, this is where we will add all our validation routines
 	if err != nil {
@@ -65,21 +65,34 @@ func GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 //DeleteUserByID deletes a user from the database by ID
 func DeleteUserByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("DeletedUser by ID"))
+	userID := chi.URLParam(r, "userID")
+	err := validateRequest(userID) //In common.go, this is where we will add all our validation routines
+	if err != nil {
+		log.Print("Invalid User ID entered, stopping before database hit, error was: ", err, " Requested ID was: ", userID)
+		w.Write([]byte("Must enter a valid userID to perform a DELETE, hit error: " + err.Error())) //Might redirect user to their own homepage?  OR 404? Not sure.
+		return
+	}
+	result, err := DB.Exec(`DELETE FROM users where id = $1`, userID)
+	if err != nil {
+		log.Print("Error deleting user by ID", userID)
+		return
+	}
+	log.Print("Sql Result", result)
+	w.Write([]byte("Deleted User by ID" + userID))
 }
 
 //CreateUser creates a new user
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	newUser := &userData{}
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
-	fmt.Println("Recieved body: ", string(bodyBytes))
+	fmt.Println("Received body: ", string(bodyBytes))
 	err := json.Unmarshal(bodyBytes, newUser)
 	if err != nil {
 		log.Print("Unable to create new user: ", err)
 		return
 	}
 	fmt.Println(newUser)
-	w.Write([]byte("Recieved JSON, creating user"))
+	w.Write([]byte("Received JSON, creating user"))
 	sqlStatement := `
 	INSERT INTO users (full_name, username, email, password, profile_photo_url, header_photo_url)
 	VALUES ($1, $2, $3, $4, $5, $6)`
@@ -93,5 +106,33 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 //UpdateUserByID changes fields for an existing user
 func UpdateUserByID(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Updating User by ID"))
+	getUser := &userData{}
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	fmt.Println("Received body: ", string(bodyBytes))
+	err := json.Unmarshal(bodyBytes, getUser)
+	if err != nil {
+		log.Print("Unable to Update user: ", err)
+		return
+	}
+	userID := chi.URLParam(r, "userID")
+	err = validateRequest(userID) //In common.go, this is where we will add all our validation routines
+	if err != nil {
+		log.Print("Invalid User ID entered, stopping before database hit, error was: ", err, " Requested ID was: ", userID)
+		w.Write([]byte("Must enter a valid userID to perform a GET, hit error: " + err.Error())) //Might redirect user to their own homepage?  OR 404? Not sure.
+		return
+	}
+	sqlStatement := `
+	UPDATE users 
+	SET full_name = $2, username = $3, email = $4, password = $5, profile_photo_url = $6, header_photo_url = $7
+	WHERE id = $1`
+	result, err := DB.Exec(sqlStatement, userID, getUser.FullName, getUser.Username, getUser.Email, getUser.Password, getUser.ProfilePhotoURL, getUser.HeaderPhotoURL)
+	if err != nil {
+		log.Print("Error updating user by ID ", userID, " Error:", err.Error())
+		return
+
+	}
+	log.Print("Sql Result", result)
+	log.Print("Update completed correctly for user: ", getUser.FullName)
+	updateUserJSON, err := json.Marshal(getUser)
+	w.Write([]byte(updateUserJSON))
 }
