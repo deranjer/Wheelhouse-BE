@@ -15,7 +15,6 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/lib/pq v1.1.1
 	github.com/mattn/go-oci8 v0.0.0-20190524004114-abcafa411cc8 // indirect
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
-	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	golang.org/x/crypto v0.1.0 // indirect
 	gopkg.in/testfixtures.v2 v2.5.3
 )
